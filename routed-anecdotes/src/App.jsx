@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useParams } from 'react-router-dom'
 
 const Menu = () => {
   const padding = {
@@ -18,10 +18,33 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id}>{anecdote.content}</li>)}
+      {anecdotes.map(anecdote => (
+        <li key={anecdote.id}>
+          <Link to={`/anecdotes/${anecdote.id}`}>
+            {anecdote.content}
+          </Link>
+        </li>
+      ))}
     </ul>
   </div>
 )
+
+const Anecdote = ({ anecdote }) => {
+  return (
+    <div>
+      <h2>{anecdote.content}</h2>
+      <div>author: {anecdote.author}</div>
+      <div>info: <a href={anecdote.info}>{anecdote.info}</a></div>
+      <div>votes: {anecdote.votes}</div>
+    </div>
+  )
+}
+
+const AnecdoteWrapper = ({ anecdotes }) => {
+  const id = Number(useParams().id)
+  const anecdote = anecdotes.find(a => a.id === id)
+  return <Anecdote anecdote={anecdote} />
+}
 
 const About = () => (
   <div>
@@ -36,8 +59,7 @@ const About = () => (
 
 const Footer = () => (
   <div>
-    Anecdote app for <a href='https://fullstackopen.com/'>Full Stack Open</a>.
-
+    Anecdote app for <a href='https://fullstackopen.com/'>Full Stack Open</a>.<br />
     See <a href='https://github.com/fullstack-hy2020/routed-anecdotes/blob/master/src/App.jsx'>
       https://github.com/fullstack-hy2020/routed-anecdotes/blob/master/src/App.jsx
     </a> for the source code.
@@ -105,19 +127,20 @@ const App = () => {
   }
 
   return (
-      <div>
-        <h1>Software anecdotes</h1>
+    <div>
+      <h1>Software anecdotes</h1>
 
-        <Menu />
+      <Menu />
 
-        <Routes>
-          <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
-          <Route path="/create" element={<CreateNew addNew={addNew} />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
+        <Route path="/create" element={<CreateNew addNew={addNew} />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/anecdotes/:id" element={<AnecdoteWrapper anecdotes={anecdotes} />} />
+      </Routes>
 
-        <Footer />
-      </div>
+      <Footer />
+    </div>
   )
 }
 
