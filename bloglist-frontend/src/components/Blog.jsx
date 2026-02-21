@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useUser } from '../contexts/UserContext'
 
-const Blog = ({ blog, onLike, onDelete, user }) => {
+const Blog = ({ blog, onLike, onDelete }) => {
   const [visible, setVisible] = useState(false)
+  const { user } = useUser()
 
   const toggleVisibility = () => {
     setVisible(!visible)
@@ -10,7 +12,7 @@ const Blog = ({ blog, onLike, onDelete, user }) => {
   const showWhenVisible = { display: visible ? '' : 'none' }
 
   const canDelete =
-    blog.user?.username === user.username || blog.user === user.id
+    blog.user?.username === user?.username || blog.user === user?.id
 
   return (
     <div className="blog">
@@ -21,10 +23,12 @@ const Blog = ({ blog, onLike, onDelete, user }) => {
 
       <div style={showWhenVisible} className="blogDetails">
         <div>{blog.url}</div>
+
         <div>
           likes {blog.likes}
           <button onClick={onLike}>like</button>
         </div>
+
         <div>{blog.user?.name}</div>
 
         {canDelete && <button onClick={onDelete}>remove</button>}
