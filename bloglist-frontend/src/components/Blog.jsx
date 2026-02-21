@@ -1,41 +1,34 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, likeBlog, deleteBlog, user }) => {
+const Blog = ({ blog, onLike, onDelete, user }) => {
   const [visible, setVisible] = useState(false)
 
   const toggleVisibility = () => {
     setVisible(!visible)
   }
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
-  }
+  const showWhenVisible = { display: visible ? '' : 'none' }
+
+  const canDelete =
+    blog.user?.username === user.username || blog.user === user.id
 
   return (
-    <div style={blogStyle}>
+    <div className="blog">
       <div>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>{visible ? 'hide' : 'view'}</button>
       </div>
 
-      {visible && (
+      <div style={showWhenVisible} className="blogDetails">
+        <div>{blog.url}</div>
         <div>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes}
-            <button onClick={() => likeBlog(blog)}>like</button>
-          </div>
-          <div>{blog.user?.name}</div>
-
-          {blog.user?.username === user.username && (
-            <button onClick={() => deleteBlog(blog)}>delete</button>
-          )}
+          likes {blog.likes}
+          <button onClick={onLike}>like</button>
         </div>
-      )}
+        <div>{blog.user?.name}</div>
+
+        {canDelete && <button onClick={onDelete}>remove</button>}
+      </div>
     </div>
   )
 }

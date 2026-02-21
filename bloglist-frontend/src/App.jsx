@@ -18,13 +18,13 @@ const App = () => {
   const { showNotification } = useNotification()
   const queryClient = useQueryClient()
 
-  // React Query: fetch blogs
+  // Fetch blogs React Query
   const { data: blogs, isLoading } = useQuery({
     queryKey: ['blogs'],
     queryFn: blogService.getAll
   })
 
-  // React Query: create blog
+  // Create blog mutation
   const newBlogMutation = useMutation({
     mutationFn: blogService.create,
     onSuccess: (newBlog) => {
@@ -39,7 +39,37 @@ const App = () => {
     }
   })
 
-  // Login: still handled with React state
+  // Like blog mutation
+  const likeBlogMutation = useMutation({
+    mutationFn: (blog) => {
+      const updatedBlog = {
+        ...blog,
+        likes: blog.likes + 1,
+        user: blog.user.id || blog.user
+      }
+      return blogService.update(blog.id, updatedBlog)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+    onError: () => {
+      showNotification('failed to update likes', 'error')
+    }
+  })
+
+  // Delete blog mutation
+  const deleteBlogMutation = useMutation({
+    mutationFn: (blog) => blogService.remove(blog.id),
+    onSuccess: (_, blog) => {
+      showNotification(`Deleted "${blog.title}"`)
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+    onError: () => {
+      showNotification('failed to delete blog', 'error')
+    }
+  })
+
+  // Login logic
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -57,7 +87,7 @@ const App = () => {
     }
   }
 
-  // Load logged user from localStorage
+  // Load logged user
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -67,12 +97,11 @@ const App = () => {
     }
   }, [])
 
-  // Loading state
   if (isLoading) {
     return <div>loading blogs...</div>
   }
 
-  // Login form
+  // Login view
   if (user === null) {
     return (
       <div>
@@ -127,7 +156,13 @@ const App = () => {
         .slice()
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blog key={blog.id} blog={blog} />
+          <Blog
+            key={blog.id}
+            blog={blog}
+            onLike={() => likeBlogMutation.mutate(blog)}
+            onDelete={() => deleteBlogMutation.mutate(blog)}
+            user={user}
+          />
         ))}
     </div>
   )
