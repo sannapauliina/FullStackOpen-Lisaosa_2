@@ -5,25 +5,16 @@ import loginService from './services/login'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import { useNotification } from './contexts/NotificationContext'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [notification, setNotification] = useState({
-    message: null,
-    type: null
-  })
-
   const blogFormRef = useRef()
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type })
-    setTimeout(() => {
-      setNotification({ message: null, type: null })
-    }, 5000)
-  }
+  const { showNotification } = useNotification()
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -113,7 +104,7 @@ const App = () => {
   if (user === null) {
     return (
       <div>
-        <Notification message={notification.message} type={notification.type} />
+        <Notification />
 
         <h2>Log in to application</h2>
         <form onSubmit={handleLogin}>
@@ -140,7 +131,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={notification.message} type={notification.type} />
+      <Notification />
 
       <p>
         {user.name} logged in
