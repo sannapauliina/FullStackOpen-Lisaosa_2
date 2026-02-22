@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
+import BlogView from './components/BlogView'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -178,12 +179,7 @@ const App = () => {
                   .slice()
                   .sort((a, b) => b.likes - a.likes)
                   .map((blog) => (
-                    <Blog
-                      key={blog.id}
-                      blog={blog}
-                      onLike={() => likeBlogMutation.mutate(blog)}
-                      onDelete={() => deleteBlogMutation.mutate(blog)}
-                    />
+                    <Blog key={blog.id} blog={blog} />
                   ))}
               </>
             }
@@ -191,6 +187,7 @@ const App = () => {
 
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<User />} />
+          <Route path="/blogs/:id" element={<BlogView />} />
         </Routes>
       </div>
     </Router>
