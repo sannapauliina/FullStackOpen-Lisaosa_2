@@ -16,6 +16,8 @@ import Users from './components/Users'
 import User from './components/User'
 import BlogView from './components/BlogView'
 
+import Navigation from './components/Navigation'
+
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -151,17 +153,7 @@ const App = () => {
       <div>
         <Notification />
 
-        <p>
-          {user.name} logged in
-          <button
-            onClick={() => {
-              window.localStorage.removeItem('loggedBlogappUser')
-              dispatch({ type: 'CLEAR_USER' })
-            }}
-          >
-            logout
-          </button>
-        </p>
+        <Navigation />
 
         <Routes>
           <Route
