@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Users from './components/Users'
+import User from './components/User'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -189,6 +190,7 @@ const App = () => {
           />
 
           <Route path="/users" element={<Users />} />
+          <Route path="/users/:id" element={<User />} />
         </Routes>
       </div>
     </Router>
