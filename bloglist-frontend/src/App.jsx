@@ -11,6 +11,9 @@ import { useUser } from './contexts/UserContext'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import Users from './components/Users'
+
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -142,38 +145,53 @@ const App = () => {
 
   // Logged in view
   return (
-    <div>
-      <Notification />
+    <Router>
+      <div>
+        <Notification />
 
-      <p>
-        {user.name} logged in
-        <button
-          onClick={() => {
-            window.localStorage.removeItem('loggedBlogappUser')
-            dispatch({ type: 'CLEAR_USER' })
-          }}
-        >
-          logout
-        </button>
-      </p>
+        <p>
+          {user.name} logged in
+          <button
+            onClick={() => {
+              window.localStorage.removeItem('loggedBlogappUser')
+              dispatch({ type: 'CLEAR_USER' })
+            }}
+          >
+            logout
+          </button>
+        </p>
 
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <BlogForm createBlog={(blog) => newBlogMutation.mutate(blog)} />
-      </Togglable>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+                  <BlogForm
+                    createBlog={(blog) => newBlogMutation.mutate(blog)}
+                  />
+                </Togglable>
 
-      <h2>blogs</h2>
-      {blogs
-        .slice()
-        .sort((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            onLike={() => likeBlogMutation.mutate(blog)}
-            onDelete={() => deleteBlogMutation.mutate(blog)}
+                <h2>blogs</h2>
+                {blogs
+                  .slice()
+                  .sort((a, b) => b.likes - a.likes)
+                  .map((blog) => (
+                    <Blog
+                      key={blog.id}
+                      blog={blog}
+                      onLike={() => likeBlogMutation.mutate(blog)}
+                      onDelete={() => deleteBlogMutation.mutate(blog)}
+                    />
+                  ))}
+              </>
+            }
           />
-        ))}
-    </div>
+
+          <Route path="/users" element={<Users />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
