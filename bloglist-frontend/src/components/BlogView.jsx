@@ -31,6 +31,13 @@ const BlogView = () => {
     }
   })
 
+  const commentMutation = useMutation({
+    mutationFn: ({ id, comment }) => blogService.addComment(id, comment),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
+
   const deleteBlogMutation = useMutation({
     mutationFn: (blog) => blogService.remove(blog.id),
     onSuccess: (_, blog) => {
@@ -75,6 +82,20 @@ const BlogView = () => {
           delete
         </button>
       )}
+
+      <h3>add comment</h3>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          const comment = e.target.comment.value
+          commentMutation.mutate({ id: blog.id, comment })
+          e.target.comment.value = ''
+        }}
+      >
+        <input name="comment" />
+        <button type="submit">add comment</button>
+      </form>
 
       <h3>comments</h3>
 
