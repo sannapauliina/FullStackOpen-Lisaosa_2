@@ -1,35 +1,21 @@
-import { createContext, useReducer, useContext } from 'react'
+import { createContext, useContext } from 'react'
+import { notifications } from '@mantine/notifications'
 
 const NotificationContext = createContext()
 
-const notificationReducer = (state, action) => {
-  switch (action.type) {
-    case 'SHOW':
-      return action.payload
-    case 'HIDE':
-      return ''
-    default:
-      return state
-  }
-}
-
 export const NotificationProvider = ({ children }) => {
-  const [notification, dispatch] = useReducer(notificationReducer, '')
-
-  const showNotification = (message) => {
-    dispatch({ type: 'SHOW', payload: message })
-    setTimeout(() => {
-      dispatch({ type: 'HIDE' })
-    }, 3000)
+  const showNotification = (message, type = 'info') => {
+    notifications.show({
+      message,
+      color: type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'
+    })
   }
 
   return (
-    <NotificationContext.Provider value={{ notification, showNotification }}>
+    <NotificationContext.Provider value={{ showNotification }}>
       {children}
     </NotificationContext.Provider>
   )
 }
 
-export const useNotification = () => {
-  return useContext(NotificationContext)
-}
+export const useNotification = () => useContext(NotificationContext)

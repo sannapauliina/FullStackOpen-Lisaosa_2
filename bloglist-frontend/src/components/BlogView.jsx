@@ -4,6 +4,17 @@ import blogService from '../services/blogs'
 import { useUser } from '../contexts/UserContext'
 import { useNotification } from '../contexts/NotificationContext'
 
+import {
+  Card,
+  Text,
+  Button,
+  Group,
+  Stack,
+  TextInput,
+  Divider,
+  List
+} from '@mantine/core'
+
 const BlogView = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -47,11 +58,12 @@ const BlogView = () => {
     }
   })
 
-  if (isLoading) return <div>loading blog...</div>
+  if (isLoading) return <Text>loading blog...</Text>
 
   const blog = blogs.find((b) => b.id === id)
-
   if (!blog) return null
+
+  const isOwner = user && blog.user && user.username === blog.user.username
 
   const handleDelete = () => {
     if (window.confirm(`Remove blog "${blog.title}" by ${blog.author}?`)) {
@@ -59,54 +71,74 @@ const BlogView = () => {
     }
   }
 
-  const isOwner = user && blog.user && user.username === blog.user.username
+  const handleComment = (e) => {
+    e.preventDefault()
+    const comment = e.target.comment.value
+    commentMutation.mutate({ id: blog.id, comment })
+    e.target.comment.value = ''
+  }
 
   return (
-    <div>
-      <h2>{blog.title}</h2>
+    <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <Stack>
+        <Text fw={700} size="xl">
+          {blog.title}
+        </Text>
 
-      <a href={blog.url}>{blog.url}</a>
+        <Text component="a" href={blog.url} c="blue" target="_blank">
+          {blog.url}
+        </Text>
 
-      <p>
-        {blog.likes} likes
-        <button onClick={() => likeBlogMutation.mutate(blog)}>like</button>
-      </p>
+        <Group>
+          <Text>{blog.likes} likes</Text>
+          <Button size="xs" onClick={() => likeBlogMutation.mutate(blog)}>
+            like
+          </Button>
+        </Group>
 
-      <p>added by {blog.user?.name}</p>
+        <Text c="dimmed">added by {blog.user?.name}</Text>
 
-      {isOwner && (
-        <button
-          onClick={handleDelete}
-          style={{ background: 'red', color: 'white' }}
-        >
-          delete
-        </button>
-      )}
-
-      <h3>add comment</h3>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          const comment = e.target.comment.value
-          commentMutation.mutate({ id: blog.id, comment })
-          e.target.comment.value = ''
-        }}
-      >
-        <input name="comment" />
-        <button type="submit">add comment</button>
-      </form>
-
-      <h3>comments</h3>
-
-      <ul>
-        {blog.comments && blog.comments.length > 0 ? (
-          blog.comments.map((comment, index) => <li key={index}>{comment}</li>)
-        ) : (
-          <li>No comments yet</li>
+        {isOwner && (
+          <Button
+            color="red"
+            size="xs"
+            onClick={handleDelete}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            delete
+          </Button>
         )}
-      </ul>
-    </div>
+
+        <Divider my="sm" />
+
+        <Text fw={600}>Add comment</Text>
+
+        <form onSubmit={handleComment}>
+          <Group align="flex-end">
+            <TextInput
+              name="comment"
+              placeholder="Write a comment..."
+              style={{ flexGrow: 1 }}
+            />
+            <Button type="submit">add</Button>
+          </Group>
+        </form>
+
+        <Divider my="sm" />
+
+        <Text fw={600}>Comments</Text>
+
+        {blog.comments && blog.comments.length > 0 ? (
+          <List spacing="xs">
+            {blog.comments.map((comment, index) => (
+              <List.Item key={index}>{comment}</List.Item>
+            ))}
+          </List>
+        ) : (
+          <Text c="dimmed">No comments yet</Text>
+        )}
+      </Stack>
+    </Card>
   )
 }
 

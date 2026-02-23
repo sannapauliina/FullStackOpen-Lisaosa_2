@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Card, TextInput, Button, Stack, Text } from '@mantine/core'
 
 const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('')
@@ -20,27 +21,41 @@ const BlogForm = ({ createBlog }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        title:
-        <input
-          value={title}
-          onChange={({ target }) => setTitle(target.value)}
-        />
-      </div>
-      <div>
-        author:
-        <input
-          value={author}
-          onChange={({ target }) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        url:
-        <input value={url} onChange={({ target }) => setUrl(target.value)} />
-      </div>
-      <button type="submit">create</button>
-    </form>
+    <Card shadow="sm" padding="lg" radius="md" withBorder mb="lg">
+      <Text fw={600} size="lg" mb="sm">
+        Create new blog
+      </Text>
+
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          <TextInput
+            label="Title"
+            placeholder="Blog title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+
+          <TextInput
+            label="Author"
+            placeholder="Blog author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            required
+          />
+
+          <TextInput
+            label="URL"
+            placeholder="https://example.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            required
+          />
+
+          <Button type="submit">Create</Button>
+        </Stack>
+      </form>
+    </Card>
   )
 }
 

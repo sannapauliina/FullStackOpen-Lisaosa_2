@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import userService from '../services/users'
 import { Link } from 'react-router-dom'
+import { Card, Table, Title, Text } from '@mantine/core'
 
 const Users = () => {
   const { data: users, isLoading } = useQuery({
@@ -8,31 +9,36 @@ const Users = () => {
     queryFn: userService.getAll
   })
 
-  if (isLoading) return <div>loading users...</div>
+  if (isLoading) return <Text>loading users...</Text>
 
   return (
-    <div>
-      <h2>Users</h2>
+    <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <Title order={2} mb="md">
+        Users
+      </Title>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Blogs created</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table highlightOnHover withTableBorder withColumnBorders>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Name</Table.Th>
+            <Table.Th>Blogs created</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+
+        <Table.Tbody>
           {users.map((u) => (
-            <tr key={u.id}>
-              <td>
-                <Link to={`/users/${u.id}`}>{u.name}</Link>
-              </td>
-              <td>{u.blogs.length}</td>
-            </tr>
+            <Table.Tr key={u.id}>
+              <Table.Td>
+                <Link to={`/users/${u.id}`} style={{ textDecoration: 'none' }}>
+                  {u.name}
+                </Link>
+              </Table.Td>
+              <Table.Td>{u.blogs.length}</Table.Td>
+            </Table.Tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </Table.Tbody>
+      </Table>
+    </Card>
   )
 }
 

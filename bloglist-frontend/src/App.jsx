@@ -1,22 +1,23 @@
 import { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
+
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import BlogCard from './components/BlogCard'
 
 import { useNotification } from './contexts/NotificationContext'
 import { useUser } from './contexts/UserContext'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Users from './components/Users'
 import User from './components/User'
 import BlogView from './components/BlogView'
-
 import Navigation from './components/Navigation'
+
+import { Container, Box, Title, Button, TextInput } from '@mantine/core'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -27,15 +28,11 @@ const App = () => {
   const { user, dispatch } = useUser()
   const queryClient = useQueryClient()
 
-  // Fetch blogs React Query
   const { data: blogs, isLoading } = useQuery({
     queryKey: ['blogs'],
     queryFn: blogService.getAll
   })
 
-  console.log('BLOGS FROM QUERY:', blogs)
-
-  // Create blog mutation
   const newBlogMutation = useMutation({
     mutationFn: blogService.create,
     onSuccess: (newBlog) => {
@@ -45,12 +42,9 @@ const App = () => {
       )
       blogFormRef.current.toggleVisibility()
     },
-    onError: () => {
-      showNotification('failed to add blog', 'error')
-    }
+    onError: () => showNotification('failed to add blog', 'error')
   })
 
-  // Like blog mutation
   const likeBlogMutation = useMutation({
     mutationFn: async (blog) => {
       const updatedBlog = {
@@ -58,30 +52,21 @@ const App = () => {
         likes: blog.likes + 1,
         user: blog.user.id
       }
-
       return blogService.update(blog.id, updatedBlog)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] })
-    },
-    onError: () => {
-      showNotification('failed to update likes', 'error')
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blogs'] }),
+    onError: () => showNotification('failed to update likes', 'error')
   })
 
-  // Delete blog mutation
   const deleteBlogMutation = useMutation({
     mutationFn: (blog) => blogService.remove(blog.id),
     onSuccess: (_, blog) => {
       showNotification(`Deleted "${blog.title}"`)
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
     },
-    onError: () => {
-      showNotification('failed to delete blog', 'error')
-    }
+    onError: () => showNotification('failed to delete blog', 'error')
   })
 
-  // Login logic
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -104,7 +89,6 @@ const App = () => {
     }
   }
 
-  // Load logged user from localStorage
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -114,74 +98,76 @@ const App = () => {
     }
   }, [dispatch])
 
-  if (isLoading) {
-    return <div>loading blogs...</div>
-  }
+  if (isLoading) return <div>loading blogs...</div>
 
-  // Login view
   if (user === null) {
     return (
-      <div>
-        <Notification />
+      <Container size="sm" py={40}>
+        <Title order={2} mb={20}>
+          Log in to application
+        </Title>
 
-        <h2>Log in to application</h2>
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input
-              value={username}
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-            <input
-              type="password"
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
+        <Box component="form" onSubmit={handleLogin}>
+          <TextInput
+            label="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            mb="md"
+          />
+
+          <TextInput
+            label="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            mb="md"
+          />
+
+          <Button type="submit" color="blue">
+            login
+          </Button>
+        </Box>
+      </Container>
     )
   }
 
-  // Logged in view
   return (
     <Router>
-      <div>
-        <Notification />
-
+      <Container size="md" py={20}>
         <Navigation />
 
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-                  <BlogForm
-                    createBlog={(blog) => newBlogMutation.mutate(blog)}
-                  />
-                </Togglable>
+        <Box mt="md">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+                    <BlogForm
+                      createBlog={(blog) => newBlogMutation.mutate(blog)}
+                    />
+                  </Togglable>
 
-                <h2>blogs</h2>
-                {blogs
-                  .slice()
-                  .sort((a, b) => b.likes - a.likes)
-                  .map((blog) => (
-                    <Blog key={blog.id} blog={blog} />
-                  ))}
-              </>
-            }
-          />
+                  <Title order={2} mt={30} mb={20}>
+                    blogs
+                  </Title>
 
-          <Route path="/users" element={<Users />} />
-          <Route path="/users/:id" element={<User />} />
-          <Route path="/blogs/:id" element={<BlogView />} />
-        </Routes>
-      </div>
+                  {blogs
+                    .slice()
+                    .sort((a, b) => b.likes - a.likes)
+                    .map((blog) => (
+                      <BlogCard key={blog.id} blog={blog} />
+                    ))}
+                </>
+              }
+            />
+
+            <Route path="/users" element={<Users />} />
+            <Route path="/users/:id" element={<User />} />
+            <Route path="/blogs/:id" element={<BlogView />} />
+          </Routes>
+        </Box>
+      </Container>
     </Router>
   )
 }
